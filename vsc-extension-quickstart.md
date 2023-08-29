@@ -1,42 +1,48 @@
-# Welcome to your VS Code Extension
+# RegexForge - Visual Studio Code Extension
 
-## What's in the folder
+**RegexForge** is a Visual Studio Code extension that empowers you to effortlessly create regular expressions with the help of OpenAI's ChatGPT. With RegexForge, you can interactively describe the regex pattern you need, and the extension will generate the appropriate regular expression for you.
 
-* This folder contains all of the files necessary for your extension.
-* `package.json` - this is the manifest file in which you declare your extension and command.
-  * The sample plugin registers a command and defines its title and command name. With this information VS Code can show the command in the command palette. It doesn’t yet need to load the plugin.
-* `src/extension.ts` - this is the main file where you will provide the implementation of your command.
-  * The file exports one function, `activate`, which is called the very first time your extension is activated (in this case by executing the command). Inside the `activate` function we call `registerCommand`.
-  * We pass the function containing the implementation of the command as the second parameter to `registerCommand`.
+## Features
 
-## Get up and running straight away
+- Generate regular expressions using natural language descriptions.
+- Utilize OpenAI's ChatGPT to assist in creating complex regex patterns.
+- Insert generated regex patterns at the cursor location.
+- Display explanations for the generated regex patterns to enhance understanding.
 
-* Press `F5` to open a new window with your extension loaded.
-* Run your command from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and typing `Hello World`.
-* Set breakpoints in your code inside `src/extension.ts` to debug your extension.
-* Find output from your extension in the debug console.
+## Usage
 
-## Make changes
+1. **Installation**: Install the RegexForge extension from the Visual Studio Code Marketplace.
 
-* You can relaunch the extension from the debug toolbar after changing code in `src/extension.ts`.
-* You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes.
+2. **Generating Regex Patterns**:
+   - Open a text editor window in Visual Studio Code.
+   - Position your cursor where you want the generated regex pattern to be inserted.
 
-## Explore the API
+3. **Triggering the Generation**:
+   - On macOS, press `Cmd + Ctrl + R` or `Ctrl + Alt + R` on Windows to open the input box.
+   - Type a prompt that describes the regex pattern you need. For example, "Match email addresses."
+   - Press `Enter` to confirm the prompt.
 
-* You can open the full set of our API when you open the file `node_modules/@types/vscode/index.d.ts`.
+4. **Inserting and Explanation**:
+   - RegexForge will insert the generated regex pattern at the cursor location in your code.
+   - An information box will appear with an explanation of the generated regex pattern to help you understand its purpose and components.
 
-## Run tests
+## Example
 
-* Open the debug viewlet (`Ctrl+Shift+D` or `Cmd+Shift+D` on Mac) and from the launch configuration dropdown pick `Extension Tests`.
-* Press `F5` to run the tests in a new window with your extension loaded.
-* See the output of the test result in the debug console.
-* Make changes to `src/test/suite/extension.test.ts` or create new test files inside the `test/suite` folder.
-  * The provided test runner will only consider files matching the name pattern `**.test.ts`.
-  * You can create folders inside the `test` folder to structure your tests any way you want.
+Suppose you're working on a project and need to match email addresses in your code. You can use RegexForge to quickly generate the necessary regex pattern:
 
-## Go further
+1. Press `Cmd + Ctrl + R` to bring up the input box.
+2. Type "Match email addresses."
+3. Press `Enter`.
 
-* [Follow UX guidelines](https://code.visualstudio.com/api/ux-guidelines/overview) to create extensions that seamlessly integrate with VS Code's native interface and patterns.
- * Reduce the extension size and improve the startup time by [bundling your extension](https://code.visualstudio.com/api/working-with-extensions/bundling-extension).
- * [Publish your extension](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) on the VS Code extension marketplace.
- * Automate builds by setting up [Continuous Integration](https://code.visualstudio.com/api/working-with-extensions/continuous-integration).
+RegexForge will insert the appropriate regex pattern for matching email addresses at your cursor location. Additionally, an explanation will be displayed to help you understand how the regex pattern works.
+
+## Contributing
+
+Contributions to RegexForge are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request in the [GitHub repository](https://github.com/nectariosouzo/regexforge).
+
+## License
+
+---
+
+RegexForge is not affiliated with or endorsed by OpenAI.
+
