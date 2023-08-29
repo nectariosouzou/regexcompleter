@@ -12,29 +12,29 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "regexcompleter" is now active!');
+	console.log('Congratulations, your extension "regexforge" is now active!');
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerTextEditorCommand('regexcompleter.helloWorld', async (editor, edit) => {
+	let disposable = vscode.commands.registerTextEditorCommand('regexforge.create', async (editor, edit) => {
 		const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 		statusBarItem.text = "$(sync~spin) API Call In Progress";
 		const userResponse = await vscode.window.showInputBox({
 			placeHolder: 'Type in an explanation for a regex extension...'
 		});
-	
+
 		 // Hide the spinning wheel
-	
+
 		if (userResponse) {
 			statusBarItem.show();
 			try {
 				const gptResponse = await callChatGPT(userResponse);
-	
+
 				editor.edit(editBuilder => {
 					editBuilder.insert(editor.selection.active, gptResponse['regex']);
 				});
-	
+
 				vscode.window.showInformationMessage(gptResponse['explanation']);
 				statusBarItem.hide();
 			} catch (error) {
@@ -46,8 +46,6 @@ export function activate(context: vscode.ExtensionContext) {
 			statusBarItem.hide();
 		}
 	});
-	
-
 	context.subscriptions.push(disposable);
 }
 
