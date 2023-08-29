@@ -18,28 +18,35 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerTextEditorCommand('regexcompleter.helloWorld', async (editor, edit) => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
+		const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+		statusBarItem.text = "$(sync~spin) API Call In Progress";
 		const userResponse = await vscode.window.showInputBox({
-  			placeHolder: 'Type in an explanation for a regex extension...'
+			placeHolder: 'Type in an explanation for a regex extension...'
 		});
+	
+		 // Hide the spinning wheel
+	
 		if (userResponse) {
+			statusBarItem.show();
 			try {
-				let gptResponse = await callChatGPT(userResponse);
+				const gptResponse = await callChatGPT(userResponse);
+	
 				editor.edit(editBuilder => {
 					editBuilder.insert(editor.selection.active, gptResponse['regex']);
 				});
+	
 				vscode.window.showInformationMessage(gptResponse['explanation']);
-			}
-			catch(error) {
+				statusBarItem.hide();
+			} catch (error) {
 				vscode.window.showErrorMessage("Error with request");
-
+				statusBarItem.hide();
 			}
-		}
-		else {
+		} else {
 			vscode.window.showErrorMessage("Error with request");
+			statusBarItem.hide();
 		}
 	});
+	
 
 	context.subscriptions.push(disposable);
 }

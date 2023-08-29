@@ -12,11 +12,19 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "statusbar": [
+      {
+          "id": "apiProgress",
+          "alignment": "right",
+          "priority": 100,
+          "name": "$(sync~spin) API In Progress"
+      }
+    ],
     "keybindings": [
       {
         "command": "regexcompleter.helloWorld",
-        "key": "ctrl+f1",
-        "mac": "cmd+ctrl+a"
+        "key": "ctrl+alr+r",
+        "mac": "cmd+ctrl+r"
       }
     ],
     "commands": [
@@ -47,7 +55,5 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "axios": "^1.4.0",
-    "openai": "^4.2.0"
   }
 }
