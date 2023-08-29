@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import axios from 'axios';
-import OpenAI from 'openai';
-import { rejects } from 'assert';
+import fetch from 'node-fetch';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
+
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -24,47 +25,48 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		if (userResponse) {
 			try {
-				let gptResponse = await callChatGPT("Return json object, nothing else, with field regex, and explanation. One just being the described regex as a string and the other being an explanation of how the regex works."+userResponse);
-				const jsonReply = JSON.parse(gptResponse);
+				let gptResponse = await callChatGPT(userResponse);
 				editor.edit(editBuilder => {
-					editBuilder.insert(editor.selection.active, jsonReply['regex']);
+					editBuilder.insert(editor.selection.active, gptResponse['regex']);
 				});
-				vscode.window.showInformationMessage(jsonReply['explanation']);
+				vscode.window.showInformationMessage(gptResponse['explanation']);
 			}
 			catch(error) {
-				console.error("Error calling ChatGPT:", error);
+				vscode.window.showErrorMessage("Error with request");
+
 			}
 		}
 		else {
-			console.log("HFHFHFHFHD");
+			vscode.window.showErrorMessage("Error with request");
 		}
 	});
 
 	context.subscriptions.push(disposable);
 }
 
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const OPENAI_API_KEY = "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"; // Make sure to replace this with your actual API key
+async function callChatGPT(userPrompt: string) {
+	const bodyData = {
+        prompt: userPrompt
+    };
 
-async function callChatGPT(message: string): Promise<string> {
+    try {
+        const response = await fetch(ENDPOINT_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(bodyData)
+        });
 
-	const openai = new OpenAI({
-		apiKey: OPENAI_API_KEY,
-	});
-	try {
-		const chatCompletion = await openai.chat.completions.create({
-			messages: [{ role: "user", content: message }],
-			model: "gpt-3.5-turbo",
-		});
-		const reply = chatCompletion.choices[0].message.content;
-		if (reply) {
-			return reply;
-		}
-	}
-	catch (error) {
-		throw new Error("PPOOOOOP");
-	}
-	throw new Error("PPOOOOOP");
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+		return responseData;
+    } catch (error) {
+		throw new Error(`There was a problem with the fetch operation: ${error}`);
+    }
 }
 
 // This method is called when your extension is deactivated
