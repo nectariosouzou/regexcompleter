@@ -2,8 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import fetch from 'node-fetch';
-
+import fetch, { RequestInit } from 'node-fetch';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
@@ -23,56 +22,60 @@ export function activate(context: vscode.ExtensionContext) {
 		const userResponse = await vscode.window.showInputBox({
 			placeHolder: 'Type in an explanation for a regex extension...'
 		});
-
-		 // Hide the spinning wheel
-
 		if (userResponse) {
 			statusBarItem.show();
-			try {
-				const gptResponse = await callChatGPT(userResponse);
-
+			callChatGPT(userResponse).then((response) => {
+				const gptMap = JSON.parse(response);
 				editor.edit(editBuilder => {
-					editBuilder.insert(editor.selection.active, gptResponse['regex']);
+					editBuilder.insert(editor.selection.active, gptMap['regex']);
 				});
-
-				vscode.window.showInformationMessage(gptResponse['explanation']);
+				vscode.window.showInformationMessage(gptMap['explanation']);
 				statusBarItem.hide();
-			} catch (error) {
+			}).catch((error) => {
 				vscode.window.showErrorMessage("Error with request");
 				statusBarItem.hide();
-			}
-		} else {
-			vscode.window.showErrorMessage("Error with request");
-			statusBarItem.hide();
+			});
 		}
 	});
 	context.subscriptions.push(disposable);
 }
 
-async function callChatGPT(userPrompt: string) {
-	const bodyData = {
+async function callChatGPT(userPrompt: string): Promise<string> {
+	const timeoutMs = 10000;
+    const bodyData = {
         prompt: userPrompt
+    };
+    const bodyJson = JSON.stringify(bodyData);
+
+    const options: RequestInit = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': bodyJson.length.toString()
+        },
+        body: bodyJson
     };
 
     try {
-        const response = await fetch(ENDPOINT_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(bodyData)
-        });
-
+        const response = await Promise.race([fetch(ENDPOINT_URL, options), createTimeoutPromise(timeoutMs)]);
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            throw new Error(`HTTP request failed with status: ${response.status}`);
         }
-
-        const responseData = await response.json();
-		return responseData;
+        const responseData = await response.text();
+        return responseData;
     } catch (error) {
-		throw new Error(`There was a problem with the fetch operation: ${error}`);
+        throw error;
     }
 }
 
+function createTimeoutPromise(timeout: number): Promise<never> {
+    return new Promise<never>((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out'));
+        }, timeout);
+    });
+}
 // This method is called when your extension is deactivated
 export function deactivate() {}
+
+

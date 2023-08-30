@@ -1,6 +1,6 @@
 {
   "name": "regexforge",
-  "displayName": "Regex Forge",
+  "displayName": "RegexForge",
   "description": "Use ChatGPT to create regex expressions",
   "repository": {
     "type": "git",
@@ -8,28 +8,22 @@
   },
   "publisher": "NectariosOuzounidisRegexForge",
   "icon": "assets/logo.png",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "engines": {
-    "vscode": "^1.81.0"
+    "vscode": "^1.81.x"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartup"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "statusbar": [
-      {
-        "id": "apiProgress",
-        "alignment": "right",
-        "priority": 100,
-        "name": "$(sync~spin) API In Progress"
-      }
-    ],
     "keybindings": [
       {
         "command": "regexforge.create",
-        "key": "ctrl+alr+r",
+        "key": "ctrl+alt+r",
         "mac": "cmd+ctrl+r"
       }
     ],
@@ -52,15 +46,18 @@
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/node-fetch": "2.6.x",
-    "@types/vscode": "^1.81.0",
+    "@types/node-fetch": "^2.6.4",
+    "@types/vscode": "^1.81.x",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
     "@vscode/test-electron": "^2.3.4",
     "@vscode/vsce": "^2.20.1",
     "eslint": "^8.47.0",
-    "glob": "^10.3.3",
     "mocha": "^10.2.0",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "glob": "^10.3.3",
+    "node-fetch": "^2.7.0"
   }
 }
