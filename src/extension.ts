@@ -3,35 +3,12 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import fetch, { RequestInit } from 'node-fetch';
-import { createLogger, format, transports } from 'winston';
 
-const { combine, timestamp, printf } = format;
-
-const myFormat = printf(({ level, message, label, timestamp, stack }) => {
-  return `${timestamp} [${label}] ${level}: ${stack || message}`;
-});
-
-const logger = createLogger({
-  format: combine(
-    format(info => {
-      if (info instanceof Error) {
-        info.stack = info.stack;
-        info.message = info.message;
-      }
-      return info;
-    })(),
-    timestamp(),
-    myFormat
-  ),
-  transports: [
-	new transports.Console(),
-	new transports.File({filename: 'errors.log', level: 'error'})],
-});
+const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
+const TIMEOUT = 10000;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
-
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -56,10 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				vscode.window.showInformationMessage(gptMap['explanation']);
 				statusBarItem.hide();
-				throw new Error("This Failed");
 			}).catch((error) => {
-				logger.error(error);
-				console.log("FFFFFFFF");
 				vscode.window.showErrorMessage("Error with request");
 				statusBarItem.hide();
 			});
