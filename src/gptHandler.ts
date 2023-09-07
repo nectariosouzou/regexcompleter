@@ -2,12 +2,12 @@ import fetch, { RequestInit } from "node-fetch";
 
 const TIMEOUT = 11000;
 
-interface GptRequest {
+interface GptIntereface {
     url: string;
     callGpt(userPrompt: string): Promise<string>;
 }
 
- export default class GptHandler implements GptRequest {
+ export default class GptHandler implements GptIntereface {
     url: string;
 
     constructor(url: string) {
@@ -30,7 +30,7 @@ interface GptRequest {
             body: bodyJson
         };
         try {
-            const response = await Promise.race([fetch(this.url, options), this.createTimeoutPromise()]);
+            const response = await Promise.race([fetch(this.url, options), createTimeoutPromise()]);
             if (!response.ok) {
                 throw new Error(`HTTP request failed with status: ${response.status}`);
             }
@@ -40,12 +40,13 @@ interface GptRequest {
             throw error;
         }
     }
+}
 
-    createTimeoutPromise(): Promise<never> {
-        return new Promise<never>((_, reject) => {
-            setTimeout(() => {
-                reject(new Error('Request timed out'));
-            }, TIMEOUT);
-        });
-    }
+
+function createTimeoutPromise(): Promise<never> {
+    return new Promise<never>((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out'));
+        }, TIMEOUT);
+    });
 }
