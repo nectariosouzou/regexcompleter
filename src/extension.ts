@@ -2,106 +2,57 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import fetch, { RequestInit } from 'node-fetch';
-import { createLogger, format, transports } from 'winston';
+import GptHandler from './gptHandler';
 
-const { combine, timestamp, printf } = format;
-
-const myFormat = printf(({ level, message, label, timestamp, stack }) => {
-  return `${timestamp} [${label}] ${level}: ${stack || message}`;
-});
-
-const logger = createLogger({
-  format: combine(
-    format(info => {
-      if (info instanceof Error) {
-        info.stack = info.stack;
-        info.message = info.message;
-      }
-      return info;
-    })(),
-    timestamp(),
-    myFormat
-  ),
-  transports: [
-	new transports.Console(),
-	new transports.File({filename: 'errors.log', level: 'error'})],
-});
+const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
-
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "regexforge" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerTextEditorCommand('regexforge.create', async (editor, edit) => {
-		const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-		statusBarItem.text = "$(sync~spin) API Call In Progress";
-		const userResponse = await vscode.window.showInputBox({
-			placeHolder: 'Type in an explanation for a regex expression...'
-		});
-		if (userResponse) {
-			statusBarItem.show();
-			callChatGPT(userResponse).then((response) => {
-				const gptMap = JSON.parse(response);
-				editor.edit(editBuilder => {
-					editBuilder.insert(editor.selection.active, gptMap['regex']);
-				});
-				vscode.window.showInformationMessage(gptMap['explanation']);
-				statusBarItem.hide();
-				throw new Error("This Failed");
-			}).catch((error) => {
-				logger.error(error);
-				console.log("FFFFFFFF");
-				vscode.window.showErrorMessage("Error with request");
-				statusBarItem.hide();
-			});
-		}
+	let disposable = vscode.commands.registerTextEditorCommand('regexforge.create', async (editor) => {
+    main(editor);
 	});
 	context.subscriptions.push(disposable);
 }
 
-async function callChatGPT(userPrompt: string): Promise<string> {
-    const bodyData = {
-        prompt: userPrompt
-    };
-    const bodyJson = JSON.stringify(bodyData);
+async function main(editor: vscode.TextEditor) {
+  let chatGpt = new GptHandler(ENDPOINT_URL);
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.text = "$(sync~spin) API Call In Progress";
 
-    const options: RequestInit = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': bodyJson.length.toString()
-        },
-        body: bodyJson
-    };
+  const userResponse = await vscode.window.showInputBox({
+    placeHolder: 'Type in an explanation for a regex expression...'
+  });
 
+  if (userResponse) {
+    statusBarItem.show();
     try {
-        const response = await Promise.race([fetch(ENDPOINT_URL, options), createTimeoutPromise()]);
-        if (!response.ok) {
-            throw new Error(`HTTP request failed with status: ${response.status}`);
-        }
-        const responseData = await response.text();
-        return responseData;
-    } catch (error) {
-        throw error;
+      const response = await chatGpt.callGpt(userResponse);
+      const gptMap = JSON.parse(response);
+
+      editor.edit(editBuilder => {
+          editBuilder.insert(editor.selection.active, gptMap['regex']);
+      });
+      vscode.window.showInformationMessage(gptMap['explanation']);
     }
+    catch (error) {
+      vscode.window.showErrorMessage("Error with request");
+    }
+    finally{
+      statusBarItem.hide();
+      statusBarItem.dispose();
+    }
+  }
+  if (!userResponse) {
+    // User canceled or provided no input, so we exit early\
+    statusBarItem.dispose();
+    return;
+  }
 }
 
-function createTimeoutPromise(): Promise<never> {
-    return new Promise<never>((_, reject) => {
-        setTimeout(() => {
-            reject(new Error('Request timed out'));
-        }, TIMEOUT);
-    });
-}
 // This method is called when your extension is deactivated
 export function deactivate() {}
 
