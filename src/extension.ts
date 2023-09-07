@@ -3,6 +3,31 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import fetch, { RequestInit } from 'node-fetch';
+import { createLogger, format, transports } from 'winston';
+
+const { combine, timestamp, printf } = format;
+
+const myFormat = printf(({ level, message, label, timestamp, stack }) => {
+  return `${timestamp} [${label}] ${level}: ${stack || message}`;
+});
+
+const logger = createLogger({
+  format: combine(
+    format(info => {
+      if (info instanceof Error) {
+        info.stack = info.stack;
+        info.message = info.message;
+      }
+      return info;
+    })(),
+    timestamp(),
+    myFormat
+  ),
+  transports: [
+	new transports.Console(),
+	new transports.File({filename: 'errors.log', level: 'error'})],
+});
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
@@ -20,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 		statusBarItem.text = "$(sync~spin) API Call In Progress";
 		const userResponse = await vscode.window.showInputBox({
-			placeHolder: 'Type in an explanation for a regex extension...'
+			placeHolder: 'Type in an explanation for a regex expression...'
 		});
 		if (userResponse) {
 			statusBarItem.show();
@@ -31,7 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				vscode.window.showInformationMessage(gptMap['explanation']);
 				statusBarItem.hide();
+				throw new Error("This Failed");
 			}).catch((error) => {
+				logger.error(error);
+				console.log("FFFFFFFF");
 				vscode.window.showErrorMessage("Error with request");
 				statusBarItem.hide();
 			});
@@ -41,7 +69,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function callChatGPT(userPrompt: string): Promise<string> {
-	const timeoutMs = 10000;
     const bodyData = {
         prompt: userPrompt
     };
@@ -57,7 +84,7 @@ async function callChatGPT(userPrompt: string): Promise<string> {
     };
 
     try {
-        const response = await Promise.race([fetch(ENDPOINT_URL, options), createTimeoutPromise(timeoutMs)]);
+        const response = await Promise.race([fetch(ENDPOINT_URL, options), createTimeoutPromise()]);
         if (!response.ok) {
             throw new Error(`HTTP request failed with status: ${response.status}`);
         }
@@ -68,11 +95,11 @@ async function callChatGPT(userPrompt: string): Promise<string> {
     }
 }
 
-function createTimeoutPromise(timeout: number): Promise<never> {
+function createTimeoutPromise(): Promise<never> {
     return new Promise<never>((_, reject) => {
         setTimeout(() => {
             reject(new Error('Request timed out'));
-        }, timeout);
+        }, TIMEOUT);
     });
 }
 // This method is called when your extension is deactivated

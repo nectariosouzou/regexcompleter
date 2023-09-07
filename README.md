@@ -38,7 +38,7 @@ RegexForge will insert the appropriate regex pattern for matching email addresse
 
 ## Contributing
 
-Contributions to RegexForge are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request in the [GitHub repository](https://github.com/nectariosouzo/regexforge).
+Contributions to RegexForge are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request in the [GitHub repository](https://github.com/nectariosouzou/regexforge).
 
 ## License
 
