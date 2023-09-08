@@ -5,23 +5,42 @@ import * as vscode from 'vscode';
 import * as sinon from "sinon";
 import { main } from '../../extension';
 import GptHandler from '../../gptHandler';
+import { beforeEach, it } from 'mocha';
 
-suite('Extension Test Suite', () => {
-	test('should handle user input and API response', async () => {
-		let gpt = new GptHandler('');
-		const doc = await vscode.workspace.openTextDocument({ content: 'h' });
-		const editor = await vscode.window.showTextDocument(doc);
-		console.log(editor.selection.active);
-		// Show the document in a TextEditor
-		let gptStub = sinon.stub(gpt, 'callGpt').resolves('{"regex": "test", "explanation": "Test explanation"}');
-		const showInputBoxStub = sinon.stub(vscode.window, 'showInputBox').resolves('User input');
+suite('main unit tests', () => {
+	let gpt: GptHandler;
+	let doc: vscode.TextDocument;
+	let editor: vscode.TextEditor;
 
-		await main(gpt, editor);
+	beforeEach(async () => {
+		gpt = new GptHandler('');
+		doc = await vscode.workspace.openTextDocument({ content: '' });
+		editor = await vscode.window.showTextDocument(doc, undefined, true);
+	});
 
-		sinon.assert.calledOnce(showInputBoxStub);
+	it('main test succesful request', async () => {
+		
+		const showInfoMessage = sinon.spy(vscode.window, 'showInformationMessage');
+		const gptStub = sinon.stub(gpt, 'callGpt').resolves('{"regex": "test", "explanation": "Test explanation"}');
+		await main(gpt, editor, "test");
+		
 		sinon.assert.calledOnce(gptStub);
 		assert.equal("test", doc.getText());
-		showInputBoxStub.restore();
+		assert(showInfoMessage.calledOnce);
+		showInfoMessage.restore();
 		gptStub.restore();
 	  });
+
+	it('main test error', async () => {
+		const showErrorMessageSpy = sinon.spy(vscode.window, 'showErrorMessage');
+		const gptStub = sinon.stub(gpt, 'callGpt').throws('Error making reqeust');
+
+		await main(gpt, editor, "test");
+		
+		sinon.assert.calledOnce(gptStub);
+		assert.equal("", doc.getText());
+		assert(showErrorMessageSpy.calledOnce);
+		showErrorMessageSpy.restore();
+		gptStub.restore();
+	});
 });

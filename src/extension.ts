@@ -14,38 +14,46 @@ export function activate(context: vscode.ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerTextEditorCommand('regexforge.create', async (editor) => {
     let chatGpt = new GptHandler(ENDPOINT_URL);
-    main(chatGpt, editor);
+    console.log('fffffff')
+    const userInput = await vscode.window.showInputBox({
+      placeHolder: 'Type in an explanation for a regex expression...'
+    });
+  
+    if (userInput) {
+      console.log("input: "+userInput)
+      main(chatGpt, editor, userInput);
+    }
 	});
 	context.subscriptions.push(disposable);
 }
 
-export async function main(chatGpt: GptInterface, editor: vscode.TextEditor) {
-
-  const userResponse = await vscode.window.showInputBox({
-    placeHolder: 'Type in an explanation for a regex expression...'
-  });
-
-  if (userResponse) {
+export async function main(chatGpt: GptInterface, editor: vscode.TextEditor, userInput: string){
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = "$(sync~spin) API Call In Progress";
     statusBarItem.show();
     try {
-      const response = await chatGpt.callGpt(userResponse);
-      const gptMap = JSON.parse(response);
-
-      editor.edit(editBuilder => {
-          editBuilder.insert(editor.selection.active, gptMap['regex']);
-      });
-      vscode.window.showInformationMessage(gptMap['explanation']);
+      const resp = await getRegexResponse(chatGpt, userInput);
+      const edit = new vscode.WorkspaceEdit();
+      edit.insert(editor.document.uri, editor.selection.active, resp['regex']);
+      await vscode.workspace.applyEdit(edit);
+      vscode.window.showInformationMessage(resp['explanation']);
     }
-    catch (error) {
-      vscode.window.showErrorMessage("Error with request");
+    catch {
+      vscode.window.showErrorMessage('Error making request');
     }
     finally{
       statusBarItem.hide();
       statusBarItem.dispose();
     }
-  }
+}
+
+async function getRegexResponse(chatGpt: GptInterface, userInput: string): Promise<{ [key: string]: string }> {
+    const response = await chatGpt.callGpt(userInput);
+    const gptMap = JSON.parse(response);
+    if (!('regex' in gptMap) || !('explanation' in gptMap)){
+      throw Error("malformed json response");
+    }
+    return gptMap;
 }
 
 // This method is called when your extension is deactivated
