@@ -14,13 +14,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerTextEditorCommand('regexforge.create', async (editor) => {
     let chatGpt = new GptHandler(ENDPOINT_URL);
-    console.log('fffffff')
     const userInput = await vscode.window.showInputBox({
       placeHolder: 'Type in an explanation for a regex expression...'
     });
   
     if (userInput) {
-      console.log("input: "+userInput)
       main(chatGpt, editor, userInput);
     }
 	});
