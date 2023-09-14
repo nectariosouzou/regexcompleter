@@ -42,6 +42,8 @@ Contributions to RegexForge are welcome! If you encounter any issues or have sug
 
 ## License
 
+# Copyright: (c) 2023, Nectarios Ouzounidis
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
 RegexForge is not affiliated with or endorsed by OpenAI.

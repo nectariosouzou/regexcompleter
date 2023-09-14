@@ -1,6 +1,9 @@
+// Copyright: (c) 2023, Nectarios Ouzounidis
+// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 import fetch, { RequestInit } from "node-fetch";
 
-const TIMEOUT = 11000;
+const TIMEOUT = 17000;
 
 interface GptIntereface {
     url: string;
@@ -37,16 +40,26 @@ interface GptIntereface {
             const responseData = await response.text();
             return responseData;
         } catch (error) {
-            throw error;
+            if (error instanceof TimeoutError) {
+                throw error;
+            }
+            throw new Error(`Request failed`);
         }
     }
 }
 
-
 function createTimeoutPromise(): Promise<never> {
     return new Promise<never>((_, reject) => {
         setTimeout(() => {
-            reject(new Error('Request timed out'));
+            reject(new TimeoutError('Request timed out'));
         }, TIMEOUT);
     });
+}
+
+class TimeoutError extends Error {
+    constructor(message?: string) {
+        super(message);
+        this.name = 'TimeoutError';
+        Object.setPrototypeOf(this, TimeoutError.prototype); // This line is needed for the instance of check to work correctly with custom errors in TypeScript
+    }
 }

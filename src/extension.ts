@@ -1,9 +1,11 @@
+// Copyright: (c) 2023, Nectarios Ouzounidis
+// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 /* eslint-disable @typescript-eslint/naming-convention */
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from 'vscode';
 import GptHandler from './gptHandler';
 import GptInterface from "./gptHandler";
+
 const ENDPOINT_URL = "https://igojsbdn5pdx522mcv3azjr3pa0juixs.lambda-url.us-east-1.on.aws";
 
 // This method is called when your extension is activated
@@ -17,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
     const userInput = await vscode.window.showInputBox({
       placeHolder: 'Type in an explanation for a regex expression...'
     });
-  
+
     if (userInput) {
       main(chatGpt, editor, userInput);
     }
@@ -36,8 +38,8 @@ export async function main(chatGpt: GptInterface, editor: vscode.TextEditor, use
       await vscode.workspace.applyEdit(edit);
       vscode.window.showInformationMessage(resp['explanation']);
     }
-    catch {
-      vscode.window.showErrorMessage('Error making request');
+    catch (error) {
+      vscode.window.showErrorMessage(`${error}`);
     }
     finally{
       statusBarItem.hide();
