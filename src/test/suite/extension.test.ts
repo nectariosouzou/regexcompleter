@@ -1,6 +1,7 @@
+// Copyright: (c) 2023, Nectarios Ouzounidis
+// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 import * as assert from 'assert';
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
 import * as sinon from "sinon";
 import { main } from '../../extension';
@@ -19,11 +20,11 @@ suite('main unit tests', () => {
 	});
 
 	it('main test succesful request', async () => {
-		
+
 		const showInfoMessage = sinon.spy(vscode.window, 'showInformationMessage');
 		const gptStub = sinon.stub(gpt, 'callGpt').resolves('{"regex": "test", "explanation": "Test explanation"}');
 		await main(gpt, editor, "test");
-		
+
 		sinon.assert.calledOnce(gptStub);
 		assert.equal("test", doc.getText());
 		assert(showInfoMessage.calledOnce);
@@ -36,7 +37,7 @@ suite('main unit tests', () => {
 		const gptStub = sinon.stub(gpt, 'callGpt').throws('Error making reqeust');
 
 		await main(gpt, editor, "test");
-		
+
 		sinon.assert.calledOnce(gptStub);
 		assert.equal("", doc.getText());
 		assert(showErrorMessageSpy.calledOnce);

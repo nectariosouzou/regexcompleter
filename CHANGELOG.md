@@ -6,4 +6,17 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+## [1.1.0]
+
+## [1.1.1]
+
+### Added
+
+- New liscense
+- copyright info
+- return specific errors to user
+
+### Changed
+
+- Amount of time requests will timeout
+- Update README
